@@ -1,7 +1,9 @@
 package com.anvesh.nogozocustomerapplication.ui.userdetails.customer
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -49,22 +51,25 @@ class CustomerDetailsFragment: BaseFragment(R.layout.fragment_userdetails_custom
     private lateinit var areaCard: CardView
     private lateinit var areaIdCard: CardView
     private lateinit var nameField: TextInputEditText
+    private lateinit var phoneFieldWrapper:TextInputLayout
     private lateinit var phoneField: TextInputEditText
     private lateinit var addressWrapper: TextInputLayout
     private lateinit var confirmButton: MaterialButton
     private var selectedCity: City? = null
     private var selectedArea: Area? = null
     private var selectedAreaId: AreaId? = null
-
+    private lateinit var sharedPreferencePhone:SharedPreferences
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        sharedPreferencePhone=activity!!.getSharedPreferences("PhoneSharedPrefernce",
+            Context.MODE_PRIVATE
+        )
         viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[CustomerDetailsFragmentViewModel::class.java]
         addressField = view.findViewById(R.id.customer_userdetails_address_field)
-
         areaCard = view.findViewById(R.id.customer_userdetails_area_wrapper)
         cityCard = view.findViewById(R.id.customer_userdetails_city_wrapper)
         areaIdCard = view.findViewById(R.id.customer_userdetails_area_id_wrapper)
         addressWrapper = view.findViewById(R.id.customer_userdetails_address_wrapper)
+        phoneFieldWrapper=view.findViewById(R.id.customer_userdetails_phone_wrapper)
         nameField = view.findViewById(R.id.customer_userdetails_name_field)
         phoneField = view.findViewById(R.id.customer_userdetails_phone_field)
         citySpinner = view.findViewById(R.id.customer_userdetails_city_view)
@@ -75,7 +80,8 @@ class CustomerDetailsFragment: BaseFragment(R.layout.fragment_userdetails_custom
         areaIdSpinner.setOnClickListener(this)
         confirmButton = view.findViewById(R.id.customer_userdetails_confirm_button)
         confirmButton.setOnClickListener(this)
-
+        phoneField.setEnabled(false);
+        phoneFieldWrapper.hint=sharedPreferencePhone.getString("PhoneNumberOtp","Number Not Registered")
     }
 
     override fun onClick(v: View?) {
@@ -280,7 +286,7 @@ class CustomerDetailsFragment: BaseFragment(R.layout.fragment_userdetails_custom
     private fun updateUserProfile(){
 
         val name = nameField.text.toString()
-        val phone = phoneField.text.toString()
+        val phone= sharedPreferencePhone.getString("PhoneNumberOtp","Number Not Registered")
         val address = addressField.text.toString()
 
         if(name.isBlank()){
@@ -288,10 +294,10 @@ class CustomerDetailsFragment: BaseFragment(R.layout.fragment_userdetails_custom
             return
         }
 
-        if(phone.isBlank() || Helper.isPhoneNumber(phone)){
+        /**if(phone.isBlank() || Helper.isPhoneNumber(phone)){
             Toast.makeText(context, "Please Enter Valid Number", Toast.LENGTH_SHORT).show()
             return
-        }
+        }**/
 
         if(address.isBlank()){
             Toast.makeText(context, "Please Enter Address", Toast.LENGTH_SHORT).show()
@@ -300,7 +306,7 @@ class CustomerDetailsFragment: BaseFragment(R.layout.fragment_userdetails_custom
 
         val map: HashMap<String, Any> = HashMap()
         map["name"] = name
-        map["phone"] = phone
+        map["phone"] = phone as String
         map["cityname"] = selectedCity!!.cityName
         map["cityid"] = selectedCity!!.cityId
         map["areaname"] = selectedArea!!.areaName

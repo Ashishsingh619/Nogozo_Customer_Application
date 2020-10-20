@@ -1,8 +1,10 @@
 package com.anvesh.nogozocustomerapplication.ui.main.customer.itemsInShop
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -27,6 +29,8 @@ import com.anvesh.nogozocustomerapplication.util.Constants.USER_TYPE
 import com.anvesh.nogozocustomerapplication.util.Constants.userType_CUSTOMER
 import com.anvesh.nogozocustomerapplication.util.VerticalSpacingItemDecoration
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.database.*
+import com.google.firebase.database.ktx.getValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -46,14 +50,15 @@ class ItemsInShopFragment(
     private lateinit var proceedButton: MaterialButton
     private lateinit var progressBar: ProgressBar
     private lateinit var searchView: SearchView
-
+    lateinit var ref:DatabaseReference
+    var locationAdress:String=" "
     private lateinit var itemsinshop_shopname_header: TextView
     private lateinit var vendor_address: TextView
     private lateinit var vendor_phone: TextView
     private lateinit var vendor_delivery_status: TextView
     private lateinit var vendor_delivery_chargers: TextView
     private lateinit var free_delivery_amount: TextView
-
+    private lateinit var btn_checkLocation:Button
     private var isDelivering = false
     lateinit var vendor: VendorProfile
     private lateinit var adapter: ItemsInShopAdapter
@@ -74,14 +79,16 @@ class ItemsInShopFragment(
         progressBar = view.findViewById(R.id.fragment_iteminshops_progressBar)
         proceedButton = view.findViewById(R.id.fragment_main_iteminshop_proceed)
         proceedButton.setOnClickListener(this)
-
+        btn_checkLocation=view.findViewById(R.id.btn_checkLocation)
         itemsinshop_shopname_header = view.findViewById(R.id.itemsinsop_shopname_header)
         vendor_address = view.findViewById(R.id.itemsinsop_address_header)
         vendor_phone = view.findViewById(R.id.itemsinsop_phone_header)
         vendor_delivery_status = view.findViewById(R.id.itemsinsop_delivery_status_header)
         vendor_delivery_chargers = view.findViewById(R.id.itemsinsop_delivery_charges)
         free_delivery_amount = view.findViewById(R.id.itemsinsop_free_delivery_amount)
-
+        btn_checkLocation.setOnClickListener {
+            openMap()
+        }
 
         initRecycler()
 
@@ -94,7 +101,24 @@ class ItemsInShopFragment(
             arguments!!.getString("delivery_status", "-1")
         )
         shop!!.shopAddress = arguments!!.getString(SHOP_ADDRESS, "")
+       ref=FirebaseDatabase.getInstance().getReference("users").child("shop").child(shop!!.shopId).child("profile").child("location")
+        ref.addValueEventListener(object: ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
+               Toast.makeText(context,"Error happenend in opening maps",Toast.LENGTH_LONG).show()
+            }
 
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists()){
+                  //  locationAdress=snapshot.child("location").getValue() as String
+                    locationAdress=snapshot.getValue() as String
+                }
+                else
+                {
+                    Toast.makeText(context,"Location Feature not available for this shop",Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
         getShopStatus()
         setUpVendorDetails()
 
@@ -246,4 +270,15 @@ class ItemsInShopFragment(
             }
         }
     }
+    private fun openMap()
+    {
+
+      //  var uri=Uri.parse("geo:0, 0?q=${locationAdress}")
+        var uri=Uri.parse(locationAdress)
+        var intent=Intent(Intent.ACTION_VIEW,uri)
+        intent.setPackage("com.google.android.apps.maps")
+        startActivity(intent)
+    }
 }
+
+

@@ -11,6 +11,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+#the package.
+-keepclassmembers class com.anvesh.nogozocustomerapplication.datamodels.*{
+*;
+}
+
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

@@ -1,6 +1,8 @@
 package com.anvesh.nogozocustomerapplication.ui.main
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -53,7 +55,7 @@ class MainActivity : BaseActivity(), Communicator, View.OnClickListener {
     private lateinit var usernameHeader: TextView
     private lateinit var customerEmailHeader: TextView
     private lateinit var customerPhoneHeader: TextView
-
+    private lateinit var sharedPreferencePhone:SharedPreferences
     private var userProfile: CustomerProfile? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +63,9 @@ class MainActivity : BaseActivity(), Communicator, View.OnClickListener {
         sessionManager = SessionManager()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        sharedPreferencePhone=getSharedPreferences("PhoneSharedPrefernce",
+            Context.MODE_PRIVATE
+        )
         drawerButton = findViewById(R.id.header_profile)
         drawerButton.setOnClickListener(this)
 
@@ -80,7 +84,7 @@ class MainActivity : BaseActivity(), Communicator, View.OnClickListener {
             addListenerForSingleValueEvent(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     userProfile = snapshot.getValue(CustomerProfile::class.java)
-                    setUpCustomerHeaderViews()
+                    setUpCustomerHeaderViews()//error
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -97,6 +101,7 @@ class MainActivity : BaseActivity(), Communicator, View.OnClickListener {
         usernameHeader.text = userProfile!!.name
         customerEmailHeader.text = userProfile!!.email
         customerPhoneHeader.text = userProfile!!.phone
+
     }
 
     private fun buildCustomerDrawer() {

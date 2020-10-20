@@ -1,10 +1,15 @@
 package com.anvesh.nogozocustomerapplication.ui.auth.customer
 
+import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -26,13 +31,20 @@ import com.anvesh.nogozocustomerapplication.util.Constants.USER_TYPE
 import com.anvesh.nogozocustomerapplication.util.Constants.userType_CUSTOMER
 import com.anvesh.nogozocustomerapplication.util.Helper
 import com.anvesh.nogozocustomerapplication.R
-import com.anvesh.nogozocustomerapplication.ui.ViewModelFactory
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCallbacks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
+import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin), View.OnClickListener {
 
@@ -52,7 +64,11 @@ class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin)
     private lateinit var signupButton: MaterialButton
     private lateinit var progressBar: ProgressBar
     private lateinit var cc1: ConstraintLayout
-
+    lateinit var EditTextInputLayout:TextInputLayout
+    lateinit var phoneCallbacks: OnVerificationStateChangedCallbacks
+    lateinit var sharedPreferencePhone:SharedPreferences
+    lateinit var forgot_password:Button
+    var verificationId=""
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         emailField = view.findViewById(R.id.customer_email_field)
         passwordField = view.findViewById(R.id.customer_password_field)
@@ -62,9 +78,16 @@ class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin)
         signinButton.setOnClickListener(this)
         signupButton = view.findViewById(R.id.customer_signup_button)
         signupButton.setOnClickListener(this)
+        forgot_password=view.findViewById(R.id.forgot_password)
+        EditTextInputLayout=view.findViewById(R.id.customer_email_wrapper)
+        sharedPreferencePhone=activity!!.getSharedPreferences("PhoneSharedPrefernce", MODE_PRIVATE)
         cc1 = view.findViewById(R.id.customer_auth_signin)
 
         viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[CustomerAuthFragmentViewModel::class.java]
+        forgot_password.setOnClickListener {
+            val intent=Intent(context,ResetPasswordActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onClick(v: View?) {
@@ -77,7 +100,8 @@ class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin)
             }
             R.id.customer_signup_button -> {
                 if(viewType == viewType_SIGNUP)
-                    register()
+                   // register()
+                    verifyOtp()
                 else if(viewType == viewType_SIGNIN)
                     animate()
             }
@@ -202,11 +226,15 @@ class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin)
                 signupButton.setTextColor(resources.getColor(R.color.colorPrimary, resources.newTheme()))
                 signupButton.setBackgroundColor(resources.getColor(R.color.white, resources.newTheme()))
                 signinButton.text = "Login"
+                emailField.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                EditTextInputLayout.setHint("Email-Id")
                 signinButton.setTextColor(resources.getColor(R.color.white, resources.newTheme()))
                 signinButton.setBackgroundColor(resources.getColor(R.color.colorPrimary, resources.newTheme()))
                 constraintSet1
             }else{
-                signupButton.text = "Register"
+                signupButton.text = "Verify OTP"
+                EditTextInputLayout.setHint("Phone Number")
+                emailField.setInputType(InputType.TYPE_CLASS_NUMBER);
                 signupButton.setTextColor(resources.getColor(R.color.white, resources.newTheme()))
                 signupButton.setBackgroundColor(resources.getColor(R.color.colorPrimary, resources.newTheme()))
                 signinButton.text = "Already Have Account? Login"
@@ -226,5 +254,57 @@ class CustomerAuthFragment: BaseFragment(R.layout.fragment_auth_customer_signin)
         val sp = context!!.getSharedPreferences("notification", MODE_PRIVATE)
         if(sp.contains("token"))
             viewModel.uploadToken(sp.getString("token","")!!)
+    }
+    private fun verifyOtp()
+    {
+        progressBar.visibility = View.VISIBLE
+
+        if(emailField.text.toString().trim().isEmpty())
+        {
+            progressBar.visibility = View.GONE
+            showToast("Enter the PhoneNumber")
+        }
+        else if(emailField.text.toString().trim().length<10 || emailField.text.toString().trim().length>10)
+        {
+            progressBar.visibility = View.GONE
+            showToast("Enter a Valid Phone Number")
+        }
+
+        else {
+            verificationCallbacks()
+            sharedPreferencePhone.edit().putString("PhoneNumberOtp",emailField.text.toString().trim()).apply()
+            var phoneNo = "+91 ${emailField.text.toString().trim()}"
+            PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phoneNo, // Phone number to verify
+                60, // Timeout duration
+                TimeUnit.SECONDS, // Unit of timeout
+                activity as Activity, // Activity (for callback binding)
+                phoneCallbacks
+            ) // OnVerificationStateChangedCallbacks
+        }
+    }
+    private fun verificationCallbacks()
+    {
+        phoneCallbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
+            override fun onVerificationCompleted(p0: PhoneAuthCredential) {
+
+            }
+
+            override fun onVerificationFailed(p0: FirebaseException) {
+                showToast("Failed to send OTP")
+                progressBar.visibility = View.GONE
+            }
+
+            override fun onCodeSent(verification: String, p1: PhoneAuthProvider.ForceResendingToken) {
+                super.onCodeSent(verification, p1)
+                verificationId=verification.toString()
+                showToast("OTP sent to your number")
+                     val intent = Intent(context, OtpActivity::class.java)
+                     intent.putExtra("verificationId", verificationId)
+                     startActivity(intent)
+
+            }
+
+        }
     }
 }

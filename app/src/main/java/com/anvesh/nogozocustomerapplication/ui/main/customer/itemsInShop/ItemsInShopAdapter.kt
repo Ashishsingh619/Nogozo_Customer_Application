@@ -1,5 +1,7 @@
 package com.anvesh.nogozocustomerapplication.ui.main.customer.itemsInShop
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.Paint
 import android.util.Log
 import android.view.LayoutInflater
@@ -33,8 +35,9 @@ class ItemsInShopAdapter() : RecyclerView.Adapter<ItemsInShopAdapter.ItemsViewHo
     private var priceLiveData: MediatorLiveData<Int> = MediatorLiveData()
     private var acceptOrders: Boolean = false
     private val itemImageBaseUrl = FirebaseStorage.getInstance().reference.child("items")
-
+    lateinit var context:Context
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemsViewHolder {
+        context=parent.context
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_iteminshop, parent, false)
         return ItemsViewHolder(v)
@@ -70,9 +73,13 @@ class ItemsInShopAdapter() : RecyclerView.Adapter<ItemsInShopAdapter.ItemsViewHo
         }
 
         Glide.with(holder.itemView.context)
-            .load(itemImageBaseUrl.child(filteredList[position].itemId!!))
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .into(holder.itemImage)
+            .load(itemImageBaseUrl.child(filteredList[position].itemId!!)).into(holder.itemImage)
+         //   .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            holder.itemImage.setOnClickListener {
+                val intent= Intent(context,ZoomImageActivity::class.java)
+                intent.putExtra("ItemId",filteredList[position].itemId)
+                context.startActivity(intent)
+            }
 
         if (!filteredList[position].isAvailable!!) {
             holder.itemName.setTextColor(

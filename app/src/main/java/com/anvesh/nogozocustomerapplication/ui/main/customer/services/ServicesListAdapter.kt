@@ -30,9 +30,8 @@ class ServicesListAdapter( private val onServiceClickInterface: OnServicesClickI
     override fun onBindViewHolder(holder: ServicesViewHolder, position: Int) {
         holder.textView.text = dataList[position].servicename
         Glide.with(holder.itemView.context)
-            .load(storage.child(dataList[position].serviceId!!))
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
-            .into(holder.imageView)
+            .load(storage.child(dataList[position].serviceId!!)).diskCacheStrategy(DiskCacheStrategy.DATA).into(holder.imageView)
+
     }
 
     fun setData(dataList: List<Services>){

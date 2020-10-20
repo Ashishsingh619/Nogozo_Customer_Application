@@ -22,9 +22,11 @@ import com.anvesh.nogozocustomerapplication.util.Constants.PROFILE_LEVEL
 import com.anvesh.nogozocustomerapplication.util.Constants.PROFILE_LEVEL_0
 import com.anvesh.nogozocustomerapplication.util.Constants.PROFILE_LEVEL_1
 import com.anvesh.nogozocustomerapplication.util.Constants.USER_TYPE
+import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -90,6 +92,10 @@ class SessionManager
     fun login(email: String, password: String): Task<AuthResult> {
         return Auth().login(email, password)
     }
+    /**fun verifyOtp(phoneno:String):Task<AuthResult>{
+    return PhoneAuthProvider.getInstance().verifyPhoneNumber(phoneno, 60,
+        TimeUnit.SECONDS, this, phoneCallbacks)
+    }**/
 
     fun register(email: String, password: String): Task<AuthResult> {
         return Auth().register(email, password)
@@ -131,6 +137,7 @@ class SessionManager
             currentSessionData[CITY_ID] = profile.cityid!!
         }
     }
+
 
     fun saveCustomerProfileToLocal(map: HashMap<String, Any>){
         CoroutineScope(Dispatchers.Default).launch {

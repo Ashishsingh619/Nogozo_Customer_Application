@@ -23,6 +23,9 @@ class CustomerAuthFragmentViewModel
     fun register(email: String, password: String): Task<AuthResult> {
         return sessionManager.register(email, password)
     }
+   // fun verifyOtp(phoneno:String){
+
+    //}
 
     fun getUserProfile(): DatabaseReference {
         return sessionManager.getUserProfile()

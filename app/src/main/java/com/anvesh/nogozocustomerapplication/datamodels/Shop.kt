@@ -20,6 +20,8 @@ class Shop {
 
     var shopAreaId: String? = null
 
+
+
     constructor(shopName: String, shopId: String, imageUrl: String?, shopCurrentStatus: String?, shopAreaId: String?,deliveryStatus: String?){
         this.shopId = shopId
         this.shopName = shopName

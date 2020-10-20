@@ -76,6 +76,7 @@ class CustomerProfileFragment: BaseFragment(R.layout.fragment_profile_customer),
         areaIdSpinner.setOnClickListener(this)
         confirmButton = view.findViewById(R.id.customer_profile_confirm_button)
         confirmButton.setOnClickListener(this)
+        phoneField.setEnabled(false);
 
         getUserProfile()
     }

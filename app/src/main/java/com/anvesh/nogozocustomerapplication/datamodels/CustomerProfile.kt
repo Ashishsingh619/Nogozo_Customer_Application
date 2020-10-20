@@ -15,7 +15,7 @@ data class CustomerProfile(
     var areaid: String? = "",
     var address: String? = ""){
 
-    constructor(email: String, profilelevel: String) : this() {
+   constructor(email: String, profilelevel: String) : this() {
         this.email = email
         this.profilelevel = profilelevel
     }

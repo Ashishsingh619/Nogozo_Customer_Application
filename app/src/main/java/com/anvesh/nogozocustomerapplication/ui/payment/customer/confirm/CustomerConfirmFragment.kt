@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,6 +13,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.anvesh.nogozocustomerapplication.R
@@ -24,6 +26,8 @@ import com.anvesh.nogozocustomerapplication.ui.main.MainActivity
 import com.anvesh.nogozocustomerapplication.util.Constants.USER_TYPE
 import com.anvesh.nogozocustomerapplication.util.Constants.userType_CUSTOMER
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
@@ -40,7 +44,6 @@ class CustomerConfirmFragment : BaseFragment(R.layout.fragment_payment_confirm),
     //lateinit var factory: ViewModelFactory
 
     private lateinit var viewModel: CustomerConfirmFragmentViewModel
-
     private lateinit var confirmButton: MaterialButton
     private lateinit var itemsText: TextView
     private lateinit var deliveryChargesView: TextView
@@ -322,8 +325,10 @@ class CustomerConfirmFragment : BaseFragment(R.layout.fragment_payment_confirm),
                 deliveryChargesView.text = "No delivery"
                 addAmountForFreeDeliveryWrapper.visibility = View.GONE
                 orderData["deliverycharges"] = "0"
-                orderData.remove("customeraddress")
-                orderData.remove("customerphone")
+                orderData["customeraddress"] = viewModel.getUserAddress()//new
+                orderData["customerphone"] = viewModel.getUserPhone()//new
+               // orderData.remove("customeraddress")
+                //orderData.remove("customerphone")
                 subscribeObserver()
             }
             "freedelivery" -> {
@@ -416,6 +421,19 @@ class CustomerConfirmFragment : BaseFragment(R.layout.fragment_payment_confirm),
         dialog.setCancelable(false)
         dialog.show()
     }
+    private fun confirmOder(){
+        val dialog = android.app.AlertDialog.Builder(context)
+        dialog.setTitle("Confirmation")
+        dialog.setMessage("Please CONFIRM to book your order!")
+        dialog.setPositiveButton("CONFIRM") { text, Listener ->
+
+        }
+        dialog.setNegativeButton("CANCEL") { text, Listener ->
+
+        }
+        dialog.create()
+        dialog.show()
+    }
 
     private fun loadingDialog() {
         val dialog = Dialog(context!!)
@@ -447,34 +465,55 @@ class CustomerConfirmFragment : BaseFragment(R.layout.fragment_payment_confirm),
                 chargesDialog()
             }
             R.id.customer_confirm_confirm_button -> {
-                if (modeOfDeliverySelect) {
-                    loadingDialog()
-                    val instructions = instruction.text.toString()
-                    CoroutineScope(IO).launch {
-                        orderData["customername"] = viewModel.getUserName()
-                        orderData["customerid"] = viewModel.getUserId()
-                        if (instructions.isNotEmpty())
-                            orderData["shopinstruction"] = instructions
-                        val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
-                        val timeFormatter = SimpleDateFormat("HH:mm")
-                        orderData["date"] = dateFormatter.format(Date())
-                        orderData["time"] = timeFormatter.format(Date())
-                        val datetimeFormatter = SimpleDateFormat("yyyyMMddHHmmss")
-                        orderData["datetime"] = datetimeFormatter.format(Date())
-                        createOrderId()
-                        Database().createOrder().setValue(orderData).addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                createDialog()
+                val dialogBuilder = android.app.AlertDialog.Builder(context)
+                dialogBuilder.setMessage("Please CONFIRM to book your order!")
+                    .setCancelable(false)
+                    .setPositiveButton("CONFIRM", DialogInterface.OnClickListener {
+                            dialog, id ->
+                        if (modeOfDeliverySelect) {
+                            progressBar.visibility=View.VISIBLE
+                           // loadingDialog()
+                            val instructions = instruction.text.toString()
+                            CoroutineScope(IO).launch {
+                                orderData["customername"] = viewModel.getUserName()
+                                orderData["customerid"] = viewModel.getUserId()
+                                if (instructions.isNotEmpty())
+                                    orderData["shopinstruction"] = instructions
+                                val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
+                                val timeFormatter = SimpleDateFormat("HH:mm")
+                                orderData["date"] = dateFormatter.format(Date())
+                                orderData["time"] = timeFormatter.format(Date())
+                                val datetimeFormatter = SimpleDateFormat("yyyyMMddHHmmss")
+                                orderData["datetime"] = datetimeFormatter.format(Date())
+                                createOrderId()
+                                Database().createOrder().setValue(orderData).addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        progressBar.visibility=View.GONE
+                                        createDialog()
+                                    }
+                                }
                             }
+                        } else {
+                            Toast.makeText(
+                                activity as Context,
+                                "Please select a delivery mode",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    }
-                } else {
-                    Toast.makeText(
-                        activity as Context,
-                        "Please select a delivery mode",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+
+                    })
+                    .setNegativeButton("CANCEL", DialogInterface.OnClickListener {
+                            dialog, id -> dialog.cancel()
+                    })
+                val alert = dialogBuilder.create()
+                alert.setTitle("Confirmation")
+                alert.show()
+                alert.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.md_blue_900))
+                alert.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setBackgroundColor(Color.WHITE)
+                alert.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.md_blue_900));
+                alert.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setBackgroundColor(Color.WHITE)
+
+
             }
         }
     }

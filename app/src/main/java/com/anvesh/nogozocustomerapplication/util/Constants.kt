@@ -40,4 +40,6 @@ object Constants {
     const val LOADING = "LOADING"
     const val SUCCESS = "SUCCESS"
     const val ERROR = "ERROR"
+    //new data
+    const val PhoneNo="phoneno"
 }

@@ -61,12 +61,23 @@
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintStart_toStartOf="parent"
+    android:weightSum="1"
+    android:orientation="horizontal"
+    android:id="@+id/linearlayout"
+    app:layout_constraintTop_toBottomOf="@id/itemsinsop_shopname_header">
             <TextView
                 android:id="@+id/itemsinsop_address_header_tag"
+                android:layout_weight="0.2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="1dp"
                 android:gravity="center"
                 android:text="Address: "
                 android:textColor="@color/colorAccent"
@@ -77,58 +88,67 @@
             <TextView
                 android:id="@+id/itemsinsop_address_header"
                 android:layout_width="0dp"
+                android:layout_weight="0.8"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:gravity="center"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="1dp"
                 android:text="Address"
+                android:singleLine="false"
                 android:textColor="@color/colorAccent"
                 android:textSize="16sp"
+                app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toEndOf="@id/itemsinsop_address_header_tag"
                 app:layout_constraintTop_toBottomOf="@id/itemsinsop_shopname_header" />
-
+</LinearLayout>
 
             <TextView
                 android:id="@+id/itemsinsop_phone_header_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:text="Phone: "
                 android:textColor="@color/colorAccent"
                 android:textSize="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/itemsinsop_address_header_tag" />
+                app:layout_constraintTop_toBottomOf="@+id/linearlayout" />
 
 
             <TextView
                 android:id="@+id/itemsinsop_phone_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:text="Phone"
                 android:textColor="@color/colorAccent"
                 android:textSize="16dp"
                 app:layout_constraintStart_toEndOf="@id/itemsinsop_phone_header_tag"
-                app:layout_constraintTop_toBottomOf="@id/itemsinsop_address_header" />
+                app:layout_constraintTop_toBottomOf="@id/linearlayout" />
 
             <TextView
                 android:id="@+id/itemsinsop_delivery_status_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:text="Delivery Status"
                 android:textColor="@color/colorAccent"
                 android:textSize="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/itemsinsop_address_header" />
+                app:layout_constraintTop_toBottomOf="@+id/linearlayout" />
 
             <TextView
                 android:id="@+id/itemsinsop_free_delivery_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:text="Order more to get avail delivery"
                 android:textColor="@color/colorAccent"
@@ -141,7 +161,8 @@
                 android:id="@+id/itemsinsop_delivery_charges"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:text="Delivery Charges: "
                 android:textColor="@color/colorAccent"
@@ -172,10 +193,10 @@
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fragment_main_iteminshop_proceed"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/vendor_details_layout"
-        app:layout_constraintBottom_toTopOf="@id/fragment_main_iteminshop_proceed"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_checkLocation" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/fragment_main_iteminshop_proceed"
@@ -188,5 +209,21 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone"
         />
+
+    <Button
+        android:id="@+id/btn_checkLocation"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:padding="2dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginRight="9dp"
+        android:layout_marginBottom="1dp"
+        android:text="Check location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vendor_details_layout" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
